@@ -1,5 +1,5 @@
 import unittest
-from generativepy.drawing import setup, make_image, BUTT, ROUND, BEVEL
+from generativepy.drawing import setup, make_image, BUTT, ROUND, BEVEL, FONT_WEIGHT_BOLD, FONT_SLANT_ITALIC
 from image_test_helper import run_image_test
 from generativepy.color import Color
 from generativepy.geometry import Image, Text, Circle, circle, Bezier, Polygon, Square, square, Rectangle,\
@@ -198,18 +198,16 @@ class TestGeometryImages(unittest.TestCase):
             ctx.fill()
 
             # Ellipse objects can be filled, stroked, filled and stroked.
-            Ellipse(ctx).of_center_radius((2.5, 1), 0.7, 0.3).fill_stroke(Color(0, 0, 1), Color(0), 0.05)
+            Ellipse(ctx).of_center_radius((2.5, 1), 0.7, 0.3).fill(Color(0, 0, 1)).stroke(Color(0), 0.05)
             Ellipse(ctx).of_center_radius((4, 1), 0.7, 0.3).as_arc(0, 1).stroke(Color(0, 0.5, 0), 0.05)
 
             Ellipse(ctx).of_center_radius((1, 2.5), 0.7, 0.3).as_sector(1, 3).stroke(Color('orange'), 0.05)
             Ellipse(ctx).of_center_radius((2.5, 2.5), 0.7, 0.3).as_sector(2, 4.5).fill(Color('cadetblue'))
-            Ellipse(ctx).of_center_radius((4, 2.5), 0.7, 0.3).as_sector(2.5, 6).fill_stroke(Color('yellow'),
-                                                                                            Color('magenta'), 0.05)
+            Ellipse(ctx).of_center_radius((4, 2.5), 0.7, 0.3).as_sector(2.5, 6).fill(Color('yellow')).stroke(Color('magenta'), 0.05)
 
             Ellipse(ctx).of_center_radius((1, 4), 0.7, 0.3).as_segment(1, 3).stroke(Color('orange'), 0.05)
             Ellipse(ctx).of_center_radius((2.5, 4), 0.7, 0.3).as_segment(2, 4.5).fill(Color('cadetblue'))
-            Ellipse(ctx).of_center_radius((4, 4), 0.7, 0.3).as_segment(2.5, 6).fill_stroke(Color('yellow'),
-                                                                                           Color('magenta'), 0.05)
+            Ellipse(ctx).of_center_radius((4, 4), 0.7, 0.3).as_segment(2.5, 6).fill(Color('yellow')).stroke(Color('magenta'), 0.05)
 
         def creator(file):
             make_image(file, draw, 500, 500)
@@ -294,7 +292,7 @@ class TestGeometryImages(unittest.TestCase):
             ctx.restore()
 
             ctx.save()
-            Text(ctx).of("ABC", (1.5, 3.5)).font("Times").size(1.5).align_left().align_top().clip()
+            Text(ctx).of("ABC", (1.5, 3.5)).font("Times", weight=FONT_WEIGHT_BOLD).size(1.5).align_left().align_top().clip()
             circles = [(2, 3.8, 'orange'), (2, 4.5, 'cyan'), (3, 3.8, 'green'),
                        (3, 4.5, 'purple'), (4, 3.8, 'yellow'), (4, 4.5, 'blue')]
             for x, y, color in circles:
@@ -317,18 +315,16 @@ class TestGeometryImages(unittest.TestCase):
             ctx.fill()
 
             # Circle objects can be filled, stroked, filled and stroked.
-            Circle(ctx).of_center_radius((2.5, 1), 0.7).fill_stroke(Color(0, 0, 1), Color(0), 0.05)
+            Circle(ctx).of_center_radius((2.5, 1), 0.7).fill(Color(0, 0, 1)).stroke(Color(0), 0.05)
             Circle(ctx).of_center_radius((4, 1), 0.7).as_arc(0, 1).stroke(Color(0, 0.5, 0), 0.05)
 
             Circle(ctx).of_center_radius((1, 2.5), 0.7).as_sector(1, 3).stroke(Color('orange'), 0.05)
             Circle(ctx).of_center_radius((2.5, 2.5), 0.7).as_sector(2, 4.5).fill(Color('cadetblue'))
-            Circle(ctx).of_center_radius((4, 2.5), 0.7).as_sector(2.5, 6).fill_stroke(Color('yellow'), Color('magenta'),
-                                                                                      0.05)
+            Circle(ctx).of_center_radius((4, 2.5), 0.7).as_sector(2.5, 6).fill(Color('yellow')).stroke(Color('magenta'), 0.05)
 
             Circle(ctx).of_center_radius((1, 4), 0.7).as_segment(1, 3).stroke(Color('orange'), 0.05)
             Circle(ctx).of_center_radius((2.5, 4), 0.7).as_segment(2, 4.5).fill(Color('cadetblue'))
-            Circle(ctx).of_center_radius((4, 4), 0.7).as_segment(2.5, 6).fill_stroke(Color('yellow'), Color('magenta'),
-                                                                                     0.05)
+            Circle(ctx).of_center_radius((4, 4), 0.7).as_segment(2.5, 6).fill(Color('yellow')).stroke(Color('magenta'), 0.05)
 
         def creator(file):
             make_image(file, draw, 500, 500)
@@ -365,7 +361,7 @@ class TestGeometryImages(unittest.TestCase):
             # Rectangle objects can be filled, stroked, filled and stroked.
             Rectangle(ctx).of_corner_size((3, 1), 1, 1.2).fill(Color(0, .5, 0))
             Rectangle(ctx).of_corner_size((1, 3), 1.2, 1).stroke(Color(0, .5, 0), 0.1)
-            Rectangle(ctx).of_corner_size((3, 3), 1.2, 1).fill_stroke(Color(0, 0, 1), Color(0), 0.2)
+            Rectangle(ctx).of_corner_size((3, 3), 1.2, 1).fill(Color(0, 0, 1)).stroke(Color(0), 0.2)
 
         def creator(file):
             make_image(file, draw, 500, 500)
@@ -385,7 +381,7 @@ class TestGeometryImages(unittest.TestCase):
             # Square objects can be filled, stroked, filled and stroked.
             Square(ctx).of_corner_size((3, 1), 1).fill(Color(0, .5, 0))
             Square(ctx).of_corner_size((1, 3), 1).stroke(Color(0, .5, 0), 0.1)
-            Square(ctx).of_corner_size((3, 3), 1).fill_stroke(Color(0, 0, 1), Color(0), 0.2)
+            Square(ctx).of_corner_size((3, 3), 1).fill(Color(0, 0, 1)).stroke(Color(0), 0.2)
 
         def creator(file):
             make_image(file, draw, 500, 500)
@@ -434,16 +430,19 @@ class TestGeometryImages(unittest.TestCase):
             Text(ctx).of("Aligned", (0.5, 0.7)).font("Times").size(0.2).align_left().align_baseline().fill(Color('red'))
             Text(ctx).of("Text", (0.5, 0.9)).font("Times").size(0.2).align_left().align_baseline().fill(Color('blue'))
 
-            Text(ctx).of("Centre", (2.5, 0.5)).font("Times").size(0.2).align_center().align_baseline().fill(
-                Color('blue'))
-            Text(ctx).of("Aligned", (2.5, 0.7)).font("Times").size(0.2).align_center().align_baseline().fill(
-                Color('red'))
-            Text(ctx).of("Text", (2.5, 0.9)).font("Times").size(0.2).align_center().align_baseline().fill(Color('blue'))
+            Text(ctx).of("Centre", (2.5, 0.5)).font("Times", weight=FONT_WEIGHT_BOLD).size(0.2)\
+                     .align_center().align_baseline().fill(Color('blue'))
+            Text(ctx).of("Aligned", (2.5, 0.7)).font("Times", weight=FONT_WEIGHT_BOLD).size(0.2)\
+                     .align_center().align_baseline().fill(Color('red'))
+            Text(ctx).of("Text", (2.5, 0.9)).font("Times", weight=FONT_WEIGHT_BOLD).size(0.2)\
+                     .align_center().align_baseline().fill(Color('blue'))
 
-            Text(ctx).of("Right", (4.5, 0.5)).font("Times").size(0.2).align_right().align_baseline().fill(Color('blue'))
-            Text(ctx).of("Aligned", (4.5, 0.7)).font("Times").size(0.2).align_right().align_baseline().fill(
-                Color('red'))
-            Text(ctx).of("Text", (4.5, 0.9)).font("Times").size(0.2).align_right().align_baseline().fill(Color('blue'))
+            Text(ctx).of("Right", (4.5, 0.5)).font("Times", slant=FONT_SLANT_ITALIC).size(0.2)\
+                     .align_right().align_baseline().fill(Color('blue'))
+            Text(ctx).of("Aligned", (4.5, 0.7)).font("Times", slant=FONT_SLANT_ITALIC).size(0.2)\
+                     .align_right().align_baseline().fill(Color('red'))
+            Text(ctx).of("Text", (4.5, 0.9)).font("Times", slant=FONT_SLANT_ITALIC).size(0.2)\
+                     .align_right().align_baseline().fill(Color('blue'))
 
             Circle(ctx).of_center_radius((1.9, 2), 0.02).fill(Color(0, 0, 1))
             Text(ctx).of("gTop", (2, 2)).font("Times").size(0.2).align_left().align_top().fill(Color('black'))
@@ -469,10 +468,10 @@ class TestGeometryImages(unittest.TestCase):
 
             Circle(ctx).of_center_radius((200, 200), 10).fill(Color('red'))
             Circle(ctx).of_center_radius((100, 150), 10).fill(Color('blue'))
-            Text(ctx).of('A', (200, 200)).size(40).fill(Color(0))
-            Text(ctx).of('B', (200, 200)).offset(100, 20).size(40).fill(Color(0))
-            Text(ctx).of('C', (200, 200)).offset_angle(1, 150).size(40).fill(Color(0))
-            Text(ctx).of('D', (200, 200)).offset_towards((100, 150), 50).size(40).fill(Color(0))
+            Text(ctx).of('A', (200, 200)).font('Arial').size(40).fill(Color(0))
+            Text(ctx).of('B', (200, 200)).font('Arial').offset(100, 20).size(40).fill(Color(0))
+            Text(ctx).of('C', (200, 200)).font('Arial').offset_angle(1, 150).size(40).fill(Color(0))
+            Text(ctx).of('D', (200, 200)).font('Arial').offset_towards((100, 150), 50).size(40).fill(Color(0))
 
         def creator(file):
             make_image(file, draw, 400, 400)
@@ -503,7 +502,7 @@ class TestGeometryImages(unittest.TestCase):
             path1 = Polygon(ctx).of_points([(0, 0), (1, 1), (0.5, 2), (0.5, 1)]).path()
 
             # Get a text path object
-            path2 = Text(ctx).of("Path text", (0, 0)).font("Times").size(0.2).align_left().align_top().path()
+            path2 = Text(ctx).of("Path text", (0, 0)).font("Times", weight=FONT_WEIGHT_BOLD).size(0.2).align_left().align_top().path()
 
             # Apply the polygon in various places
             ctx.save()
