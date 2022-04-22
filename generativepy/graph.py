@@ -10,7 +10,7 @@ import copy
 from dataclasses import dataclass
 
 from generativepy.geometry import Text, Shape, FillParameters, StrokeParameters, FontParameters
-from generativepy.drawing import BUTT, FONT_WEIGHT_BOLD
+from generativepy.drawing import BUTT, FONT_WEIGHT_BOLD, FONT_SLANT_NORMAL
 from generativepy.color import Color
 from generativepy import drawing
 
@@ -109,6 +109,18 @@ class Axes:
         :return: self
         '''
         self.appearance.textcolor = pattern
+        return self
+
+    def text_style(self, font="arial", weight=FONT_WEIGHT_BOLD, slant=FONT_SLANT_NORMAL, size=15):
+        '''
+        Set the style of the axis text
+        :param font: Font name
+        :param weight: Font weight
+        :param slant: Font slant
+        :param size: Font size in units. This will be multiplied by the featurescale value.
+        :return:
+        '''
+        self.appearance.fontparams = FontParameters(font, weight, slant, size)
         return self
 
     def axis_linestyle(self, pattern=Color(0), line_width=None, dash=None, cap=None, join=None, miter_limit=None):
@@ -361,9 +373,7 @@ class Plot(Shape):
         :param miter_limit:
         :return:
         '''
-        self.axes.clip()
         super().stroke(pattern, line_width, dash, cap, join, miter_limit)
-        self.axes.unclip()
 
 
     def of_function(self, fn, extent=None, precision=100):

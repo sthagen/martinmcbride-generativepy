@@ -4,7 +4,8 @@ from image_test_helper import run_image_test
 from generativepy.color import Color
 from generativepy.geometry import Image, Text, Circle, circle, Bezier, Polygon, Square, square, Rectangle,\
                                   rectangle, Line, line, Ellipse, ellipse, tick, paratick, arrowhead, polygon,\
-                                  angle_marker, Path, Triangle, triangle, Turtle
+                                  angle_marker, Path, Triangle, triangle, Turtle, Transform, AngleMarker,\
+                                  ParallelMarker, TickMarker
 import math
 
 """
@@ -15,6 +16,77 @@ Test the geometry module.
 class TestGeometryImages(unittest.TestCase):
 
     def test_markers(self):
+        def draw(ctx, width, height, frame_no, frame_count):
+            setup(ctx, width, height, background=Color(0.8))
+            red = Color('red')
+            thickness = 3
+
+            ## Draw lines with ticks and paraticks
+            a = (50, 50)
+            b = (50, 150)
+            Line(ctx).of_start_end(a, b).stroke(red, thickness)
+            TickMarker(ctx).of_start_end(a, b).with_length(12).stroke(red, thickness)
+
+            a = (100, 50)
+            b = (150, 150)
+            Line(ctx).of_start_end(a, b).stroke(red, thickness)
+            TickMarker(ctx).of_start_end(a, b).with_length(12).with_count(2).with_gap(6).stroke(red, thickness)
+
+            a = (250, 50)
+            b = (200, 150)
+            Line(ctx).of_start_end(a, b).stroke(red, thickness)
+            TickMarker(ctx).of_start_end(a, b).with_length(12).with_count(3).with_gap(6).stroke(red, thickness)
+
+            a = (350, 50)
+            b = (350, 150)
+            Line(ctx).of_start_end(a, b).stroke(red, thickness)
+            ParallelMarker(ctx).of_start_end(a, b).with_length(12).stroke(red, thickness)
+
+            a = (400, 50)
+            b = (450, 150)
+            Line(ctx).of_start_end(a, b).stroke(red, thickness)
+            ParallelMarker(ctx).of_start_end(a, b).with_length(12).with_count(2).with_gap(6).stroke(red, thickness)
+
+            a = (550, 150)
+            b = (500, 50)
+            Line(ctx).of_start_end(a, b).stroke(red, thickness)
+            ParallelMarker(ctx).of_start_end(a, b).with_length(12).with_count(3).with_gap(6).stroke(red, thickness)
+
+
+            ## Draw lines with angles
+            a = (50, 250)
+            b = (50, 450)
+            c = (150, 450)
+            Polygon(ctx).of_points((a, b, c)).open().stroke(red, thickness)
+            AngleMarker(ctx).of_points(a, b, c).with_radius(24).with_gap(6).as_right_angle().stroke(red, thickness)
+
+            a = (250, 250)
+            b = (200, 450)
+            c = (300, 450)
+            Polygon(ctx).of_points((a, b, c)).open().stroke(red, thickness)
+            AngleMarker(ctx).of_points(a, b, c).with_count(3).with_radius(24).with_gap(6).stroke(red, thickness)
+
+            a = (300, 250)
+            b = (400, 300)
+            c = (500, 300)
+            Polygon(ctx).of_points((a, b, c)).open().stroke(red, thickness)
+            AngleMarker(ctx).of_points(c, b, a).with_radius(24).with_gap(6).stroke(red, thickness)
+
+            a = (300, 350)
+            b = (400, 400)
+            c = (500, 400)
+            Polygon(ctx).of_points((a, b, c)).open().stroke(red, thickness)
+            AngleMarker(ctx).of_points(a, b, c).with_count(2).with_radius(24).with_gap(6).stroke(red, thickness)
+
+
+        def creator(file):
+            make_image(file, draw, 600, 500)
+
+        self.assertTrue(run_image_test('test_markers.png', creator))
+
+
+    def test_old_markers(self):
+        # Deprecated marker functions
         def draw(ctx, width, height, frame_no, frame_count):
             setup(ctx, width, height, background=Color(0.8))
 
@@ -102,7 +174,7 @@ class TestGeometryImages(unittest.TestCase):
         def creator(file):
             make_image(file, draw, 600, 500)
 
-        self.assertTrue(run_image_test('test_markers.png', creator))
+        self.assertTrue(run_image_test('test_old_markers.png', creator))
 
     def test_lines(self):
         def draw(ctx, width, height, frame_no, frame_count):
@@ -568,3 +640,47 @@ class TestGeometryImages(unittest.TestCase):
             make_image(file, draw, 500, 500)
 
         self.assertTrue(run_image_test('test_turtle.png', creator))
+
+    def test_transform(self):
+        def draw(ctx, width, height, frame_no, frame_count):
+            setup(ctx, width, height, width=500, background=Color(0.8))
+
+            with Transform(ctx) as transform:
+                Text(ctx).of('A', (10, 100)).size(80).fill(Color('blue'))
+
+            Text(ctx).of('B', (110, 100)).size(80).fill(Color('black'))
+            with Transform(ctx) as transform:
+                transform.scale(0.75, 1.5)
+                Text(ctx).of('B', (110, 100)).size(80).fill(Color('blue', 0.5))
+
+            Text(ctx).of('C', (210, 100)).size(80).fill(Color('black'))
+            Circle(ctx).of_center_radius((250, 80), 5).fill(Color('red'))
+            with Transform(ctx).scale(0.75, 1.5, (250, 80)):
+                Text(ctx).of('C', (210, 100)).size(80).fill(Color('blue', 0.5))
+
+            Text(ctx).of('D', (110, 200)).size(80).fill(Color('black'))
+            with Transform(ctx) as transform:
+                transform.translate(20, 30)
+                Text(ctx).of('D', (110, 200)).size(80).fill(Color('blue', 0.5))
+
+            Text(ctx).of('E', (110, 300)).size(80).fill(Color('black'))
+            with Transform(ctx) as transform:
+                transform.rotate(0.1)
+                Text(ctx).of('E', (110, 300)).size(80).fill(Color('blue', 0.5))
+
+            Text(ctx).of('F', (210, 300)).size(80).fill(Color('black'))
+            Circle(ctx).of_center_radius((250, 80), 5).fill(Color('red'))
+            with Transform(ctx).rotate(0.1, (210, 300)):
+                Text(ctx).of('F', (210, 300)).size(80).fill(Color('blue', 0.5))
+
+            Text(ctx).of('G', (210, 400)).size(80).fill(Color('black'))
+            Circle(ctx).of_center_radius((250, 80), 5).fill(Color('red'))
+            with Transform(ctx).matrix([1, 0.5, 0, 1, 0, 0]):
+                Text(ctx).of('G', (210, 400)).size(80).fill(Color('blue', 0.5))
+
+
+        def creator(file):
+            make_image(file, draw, 500, 500)
+
+        self.assertTrue(run_image_test('test_transform.png', creator))
+
