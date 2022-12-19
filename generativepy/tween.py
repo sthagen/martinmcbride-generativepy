@@ -2,9 +2,18 @@
 # Created: 2019-01-25
 # Copyright (C) 2018, Martin McBride
 # License: MIT
-
+import collections
 import math
 
+_FRAME_RATE = 1
+
+def set_frame_rate(rate):
+    global _FRAME_RATE
+    if not isinstance(rate, (int, float)):
+        raise ValueError('Frame rate must be a numeric value')
+    if rate < 1:
+        raise ValueError('Frame rate must be one or greater')
+    _FRAME_RATE = rate
 
 class Tween():
     '''
@@ -13,8 +22,6 @@ class Tween():
     Initial value is set on construction.
 
     wait() maintains the current value for the requested number of frames
-
-    pad() similar to wait, but pads until the total length of the tween is the required size.
 
     set() sets a new current values, and adds it for the requested number of frames (which can be zero)
 
@@ -33,27 +40,32 @@ class Tween():
         self.nextFrame = 0
 
     def wait(self, count):
-        self.check_count(count)
+        count = self.check_count(count, len(self.frames))
         self.frames.extend([self.previous for i in range(count)])
         return self
 
-    def pad(self, final_length):
-        self.check_count(final_length)
-        required = final_length - len(self.frames)
-        if required > 0:
-            self.frames.extend([self.previous for i in range(required)])
+    def wait_d(self, count):
+        count = self.check_d_count(count)
+        self.frames.extend([self.previous for i in range(count)])
         return self
 
-    def set(self, value, count=0):
+    def set(self, value):
         self.check_value(value, self.previous)
-        self.check_count(count)
-        self.frames.extend([value for i in range(count)])
         self.previous = value
         return self
 
     def to(self, value, count):
         self.check_value(value, self.previous)
-        self.check_count(count)
+        count = self.check_count(count, len(self.frames))
+        for i in range(count):
+            factor = (i + 1) / count
+            self.frames.append(self.previous + factor * (value - self.previous))
+        self.previous = value
+        return self
+
+    def to_d(self, value, count):
+        self.check_value(value, self.previous)
+        count = self.check_d_count(count)
         for i in range(count):
             factor = (i + 1) / count
             self.frames.append(self.previous + factor * (value - self.previous))
@@ -62,7 +74,16 @@ class Tween():
 
     def ease(self, value, count, ease_function):
         self.check_value(value, self.previous)
-        self.check_count(count)
+        count = self.check_count(count, len(self.frames))
+        for i in range(count):
+            factor = ease_function((i + 1) / count)
+            self.frames.append(self.previous + factor * (value - self.previous))
+        self.previous = value
+        return self
+
+    def ease_d(self, value, count, ease_function):
+        self.check_value(value, self.previous)
+        count = self.check_d_count(count)
         for i in range(count):
             factor = ease_function((i + 1) / count)
             self.frames.append(self.previous + factor * (value - self.previous))
@@ -88,16 +109,23 @@ class Tween():
         return self
 
     def check_value(self, value, previous):
-        if (not isinstance(value, (int, float))) or isinstance(value, bool):
+        if not isinstance(value, (int, float)):
             raise ValueError('Numeric value required')
 
-    def check_index(self, value):
-        if not isinstance(value, int):
-            raise ValueError('Integer value required')
+    def check_count(self, count, current):
+        if not isinstance(count, (int, float)):
+            raise ValueError('Count must be a number')
+        count = int(_FRAME_RATE*count)
+        if count < current:
+            raise ValueError('New time must not be less than previous time')
+        return count - current
 
-    def check_count(self, value):
-        if not isinstance(value, int) or value < 0:
-            raise ValueError('Non-negative integer value required')
+    def check_d_count(self, count):
+        if not isinstance(count, (int, float)):
+            raise ValueError('Count must be a number')
+        if count < 0:
+            raise ValueError('Count must not be negative')
+        return int(_FRAME_RATE*count)
 
     def __len__(self):
         return len(self.frames)
@@ -116,11 +144,24 @@ class TweenVector(Tween):
     '''
 
     def __init__(self, value=(0, 0)):
+        self.check_value(value, None)
         Tween.__init__(self, value)
 
     def to(self, value, count):
         self.check_value(value, self.previous)
-        self.check_count(count)
+        count = self.check_count(count, len(self.frames))
+        for i in range(count):
+            nextvalue = []
+            factor = (i + 1) / count
+            for a, b in zip(self.previous, value):
+                nextvalue.append(a + factor * (b - a))
+            self.frames.append(nextvalue)
+        self.previous = value
+        return self
+
+    def to_d(self, value, count):
+        self.check_value(value, self.previous)
+        count = self.check_d_count(count)
         for i in range(count):
             nextvalue = []
             factor = (i + 1) / count
@@ -132,7 +173,19 @@ class TweenVector(Tween):
 
     def ease(self, value, count, ease_function):
         self.check_value(value, self.previous)
-        self.check_count(count)
+        count = self.check_count(count, len(self.frames))
+        for i in range(count):
+            nextvalue = []
+            factor = ease_function((i + 1) / count)
+            for a, b in zip(self.previous, value):
+                nextvalue.append(a + factor * (b - a))
+            self.frames.append(nextvalue)
+        self.previous = value
+        return self
+
+    def ease_d(self, value, count, ease_function):
+        self.check_value(value, self.previous)
+        count = self.check_d_count(count)
         for i in range(count):
             nextvalue = []
             factor = ease_function((i + 1) / count)
@@ -143,13 +196,12 @@ class TweenVector(Tween):
         return self
 
     def check_value(self, value, previous):
-        try:
-            if len(value) <= 0:
-                raise ValueError('Vectors of rank 0 are not supported')
-            if previous and len(value) != len(self.previous):
-                raise ValueError('All values must be vectors of equal rank')
-        except:
-            ValueError('Sequence value required')
+        if not isinstance(value, collections.abc.Sequence) or isinstance(value, str):
+            raise ValueError('Sequence value required')
+        if len(value) <= 0:
+            raise ValueError('Vectors of rank 0 are not supported')
+        if previous and len(value) != len(self.previous):
+            raise ValueError('All values must be vectors of equal rank')
 
 
 def ease_linear():
