@@ -4,7 +4,6 @@
 # License: MIT
 import cairo
 import math
-from easy_vector import Vector
 from dataclasses import dataclass
 from generativepy.drawing import LEFT, CENTER, RIGHT, BOTTOM, MIDDLE, BASELINE, TOP
 from generativepy.drawing import WINDING
@@ -12,6 +11,7 @@ from generativepy.drawing import FONT_WEIGHT_NORMAL, FONT_WEIGHT_BOLD
 from generativepy.drawing import FONT_SLANT_NORMAL, FONT_SLANT_ITALIC, FONT_SLANT_OBLIQUE
 from generativepy.drawing import MITER, ROUND, BEVEL, BUTT, SQUARE
 from generativepy.drawing import LINE, RAY, SEGMENT
+from generativepy.math import Vector as V
 from generativepy.color import Color
 
 class Pattern:
@@ -504,17 +504,13 @@ class Text(Shape):
         return self
 
     def offset_angle(self, angle, distance):
-        x = distance*math.cos(angle)
-        y = distance*math.sin(angle)
-        self._offset = (x, y)
+        self._offset = V.polar(distance, angle)
         return self
 
     def offset_towards(self, point, distance):
-        direction = Vector(point) - Vector(self.position)
-        unit = direction/direction.length
-        x = distance*unit[0]
-        y = distance*unit[1]
-        self._offset = (x, y)
+        direction = V(point) - V(self.position)
+        unit = direction.unit
+        self._offset = (distance*unit.x, distance*unit.y)
         return self
 
 
@@ -1147,12 +1143,21 @@ class Image():
 
     def __init__(self, ctx):
         self.ctx = ctx
-        self.filename = ''
+        self.image = None
         self.position = (0, 0)
         self.scale_factor = 1
 
-    def of_file_position(self, filename, position):
-        self.filename = filename
+    @staticmethod
+    def load_image(filename):
+        """
+        Load and image into an image surface.
+        @param filename: Path of file containing image.
+        @return:
+        """
+        return cairo.ImageSurface.create_from_png(filename)
+
+    def of_file_position(self, image, position):
+        self.image = image
         self.position = position
         return self
 
@@ -1161,7 +1166,7 @@ class Image():
         return self
 
     def paint(self):
-        image = cairo.ImageSurface.create_from_png(self.filename)
+        image = cairo.ImageSurface.create_from_png(self.image) if isinstance(self.image, str) else self.image
         self.ctx.save()
         self.ctx.translate(*self.position)
         self.ctx.scale(self.scale_factor, self.scale_factor)
