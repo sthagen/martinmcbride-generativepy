@@ -10,26 +10,85 @@ import math
 def get_color(color):
     return color[0], color[1], color[2]
 
-def standard_camera(distance=5, angle=0, elevation=0, lookat=[0, 0, 0]):
-    return Camera(
-        "location",
-        [distance * math.cos(angle), distance*math.sin(elevation), distance * math.sin(angle)],
-        # "angle",
-        # 20,
-        "look_at",
-        lookat,
-    )
+class Camera3d:
 
-def standard_lights(color=Color(1)):
-    light1 = LightSource([0, 0, 0], "color", get_color(color), "translate", [5, 5, 5])
-    light2 = LightSource([0, 0, 0], "color", get_color(color), "translate", [5, 5, 5])
-    return [light1, light2]
+    def __init__(self):
+        self.x = 5
+        self.y = 0
+        self.z = 0
+        self.lookat = (0, 0, 0)
 
-def scene(camera, lights, objects, bgcolor=Color(1)):
-    content = [Background("color", get_color(bgcolor))]
-    content.extend(lights)
-    content.extend(objects)
-    return Scene(camera, content)
+    def position(self, x, y, z):
+        self.x = x
+        self.y = y
+        self.z = z
+        return self
+
+    def polar_position(self, distance, angle, elevation):
+        self.x = distance * math.cos(angle)
+        self.y = distance * math.sin(angle)
+        self.z = distance * math.sin(elevation)
+        return self
+
+    def standard_plot(self):
+        self.x = 5
+        self.y = 1
+        self.z = -5
+        return self
+
+    def get(self):
+        return Camera(
+            "location",
+            [self.x, self.y, self.z],
+            "look_at",
+            self.lookat
+        )
+
+
+class Lights3d:
+
+    def __init__(self):
+        self.lights = ()
+
+    def standard(self, color=Color(1)):
+        self.lights = (
+            LightSource([0, 0, 0], "color", get_color(color), "translate", [5, 5, 5]),
+            LightSource([0, 0, 0], "color", get_color(color), "translate", [5, 5, -5])
+        )
+        return self
+
+    def standard_plot(self, color=Color(1)):
+        self.lights = (
+            LightSource([0, 0, 0], "color", get_color(color), "translate", [5, 5, 5]),
+            LightSource([0, 0, 0], "color", get_color(color), "translate", [5, 5, -5])
+        )
+        return self
+
+    def get(self):
+        return self.lights
+
+class Scene3d:
+
+    def __init__(self):
+        self.camera_item = None
+        self.background_color = Color(1)
+        self.content = []
+
+    def camera(self, camera):
+        self.camera_item = camera
+        return self
+
+    def background(self, color):
+        self.background_color = Color(1)
+        return self
+
+    def add(self, items):
+        self.content.extend(items)
+        return self
+
+    def get(self):
+        return Scene(self.camera_item, [Background("color", get_color(self.background_color))] + self.content)
+
 
 def make_povray_image(outfile, draw, width, height):
     """
@@ -44,9 +103,11 @@ def make_povray_image(outfile, draw, width, height):
     * `height`: int - The height of the image that will be created, in pixels.
 
     **Returns**
+
     None
 
     **Usage**
+    
     `make_image` creates a Pycairo drawing context object, then calls the user supplied `draw` function to draw on the
     context. It then stores the image as a PNG file.
 
