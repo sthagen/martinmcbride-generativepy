@@ -97,7 +97,7 @@ class Axes3d:
         self.start = [-2]*3
         self.end = [2]*3
         self.divs = [[-1.5, -1, -0.5, 0, 0.5, 1, 1.5]]*3
-        self.axis_thickness = 0.03
+        self.axis_thickness = 0.02
         self.axis_color = Color("black")
 
     def _make_xy_planes(self):
@@ -203,28 +203,33 @@ class Axes3d:
 
         return items
 
-    def _make_text_item(self, text, pos):
-        return Text(
+    def _make_text_item(self, text, pos, offset):
+        text = Text(
         "ttf",
              '"/usr/share/fonts/truetype/msttcorefonts/ariali.ttf"',
              f'"{text}"',
              0.1,
              0,
-            "rotate"
-            [-90, 0, 0],
+            "rotate",
+            [90, 0, 0],
+            "translate",
+            offset,
             "scale",
-            0.4,
+            0.2,
         )
+        return Union(text, "translate",
+            pos,)
 
     def _make_labels(self):
         texture = Texture(Pigment("color", get_color(self.axis_color)), Finish("phong", 1))
         items = []
 
         for p in self.divs[0]:
-            text = Text(
-        "ttf", '"/usr/share/fonts/truetype/msttcorefonts/ariali.ttf"', '"abcdefg"', 0.1, 0
-            )
-            items.append('text {ttf "/usr/share/fonts/truetype/msttcorefonts/ariali.ttf" "1.0" 0.1 0 rotate <90, 0, 0> scale 0.4}')
+            items.append(self._make_text_item(p, (p, 2, -2), (-0.5, 0, -1)))
+        for p in self.divs[1]:
+            items.append(self._make_text_item(p, (2, p, -2), (0, 0, -1)))
+        for p in self.divs[1]:
+            items.append(self._make_text_item(p, (2, -2, p), (0.5, 0, 0)))
 
         return items
 
@@ -238,7 +243,7 @@ class Axes3d:
             "rotate",
             [-90, 0, 0],
             "translate",
-            [0, -1, 0],
+            [0, 0, 0],
         )
 
     def get(self):
